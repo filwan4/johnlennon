@@ -1,9 +1,6 @@
 // 📍 Pobieranie elementów DOM
 const imageInput = document.getElementById("imageInput");
 const topInput = document.getElementById("topText");
-const bottomInput = document.getElementById("bottomText");
-const sizeInput = document.getElementById("fontSize");
-const sizeValue = document.getElementById("fontSizeValue");
 const canvas = document.getElementById("memeCanvas");
 const ctx = canvas.getContext("2d");
 const downloadButton = document.getElementById("downloadButton");
@@ -13,12 +10,9 @@ const imageStatus = document.getElementById("imageStatus");
 // 🖼️ Stan aplikacji
 let sourceImage = null;
 let fontReady = false;
-let dragging = null;
-let textBoxes = {};
-const positions = {
-  top: { x: 0.5, y: 0.035 },
-  bottom: { x: 0.5, y: 0.965 }
-};
+let dragging = false; // teraz przesuwamy tylko jeden element
+const position = { x: 0.5, y: 0.035 };
+let textBox = null;
 
 // 🔤 Ładowanie czcionki z ponownym przerysowaniem
 document.fonts.load('48px "Burst My Bubble"').then(() => {
@@ -38,17 +32,13 @@ function drawMeme() {
   
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  const baseSize = Math.max(18, canvas.width * (Number(sizeInput.value) / 100));
+  // 🔒 Rozmiar zablokowany na sztywno na 9% szerokości canvasu
+  const baseSize = Math.max(18, canvas.width * 0.09);
   ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
-  
-  // 🖤 Wymuszenie czarnego koloru i brak obrysu
   ctx.fillStyle = "#000000";
 
-  textBoxes = {
-    top: drawText(topInput.value, positions.top, "top"),
-    bottom: drawText(bottomInput.value, positions.bottom, "bottom")
-  };
+  textBox = drawText(topInput.value, position, "top");
 }
 
 // 📐 Zawijanie tekstu do nowej linii
@@ -71,14 +61,14 @@ function wrapText(text, maxWidth) {
 }
 
 // ✍️ Rysowanie pojedynczego bloku tekstu
-function drawText(text, position, anchor) {
+function drawText(text, pos, anchor) {
   if (!text.trim()) return null;
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = (Number(sizeInput.value) / 100) * canvas.width * 1.08;
-  const x = position.x * canvas.width;
-  const y = position.y * canvas.height;
+  const lineHeight = 0.09 * canvas.width * 1.08; // linia dopasowana do 9%
+  const x = pos.x * canvas.width;
+  const y = pos.y * canvas.height;
 
   ctx.textBaseline = "top";
   const totalHeight = lines.length * lineHeight;
@@ -113,17 +103,13 @@ function pointerPosition(event) {
 
 // 🖐️ Obsługa przeciągania tekstu (myszka i dotyk palcem)
 canvas.addEventListener("pointerdown", event => {
-  if (!sourceImage) return;
+  if (!sourceImage || !textBox) return;
   const point = pointerPosition(event);
-  const order = ["bottom", "top"];
 
-  dragging = order.find(key => {
-    const box = textBoxes[key];
-    return box && point.x >= box.left && point.x <= box.right &&
-                  point.y >= box.top && point.y <= box.bottom;
-  }) || null;
-
-  if (dragging) {
+  // Sprawdzamy czy kliknięto w obszar tekstu
+  if (point.x >= textBox.left && point.x <= textBox.right &&
+      point.y >= textBox.top && point.y <= textBox.bottom) {
+    dragging = true;
     canvas.setPointerCapture(event.pointerId);
     canvas.classList.add("dragging");
     event.preventDefault();
@@ -133,13 +119,13 @@ canvas.addEventListener("pointerdown", event => {
 canvas.addEventListener("pointermove", event => {
   if (!dragging) return;
   const point = pointerPosition(event);
-  positions[dragging].x = Math.max(0.03, Math.min(0.97, point.x / canvas.width));
-  positions[dragging].y = Math.max(0.02, Math.min(0.98, point.y / canvas.height));
+  position.x = Math.max(0.03, Math.min(0.97, point.x / canvas.width));
+  position.y = Math.max(0.02, Math.min(0.98, point.y / canvas.height));
   drawMeme();
 });
 
 function stopDragging() {
-  dragging = null;
+  dragging = false;
   canvas.classList.remove("dragging");
 }
 
@@ -168,13 +154,8 @@ imageInput.addEventListener("change", event => {
   img.src = url;
 });
 
-// 🎛️ Nasłuchiwanie wejść formularza
-[topInput, bottomInput].forEach(el => el.addEventListener("input", drawMeme));
-
-sizeInput.addEventListener("input", () => {
-  sizeValue.value = `${sizeInput.value}%`;
-  drawMeme();
-});
+// 🎛️ Nasłuchiwanie zmian w polu tekstowym
+topInput.addEventListener("input", drawMeme);
 
 // 💾 Pobieranie gotowego mema
 downloadButton.addEventListener("click", () => {
