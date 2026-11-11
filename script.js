@@ -31,7 +31,7 @@ function drawMeme() {
 
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  const baseSize = Math.max(18, canvas.width * 0.09);
+  const baseSize = Math.max(18, canvas.width * 0.07);
   ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
@@ -75,13 +75,12 @@ function drawText(text, pos) {
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = Math.max(22, canvas.width * 0.09 * 1.08);
+  const lineHeight = Math.max(18, canvas.width * 0.07 * 1.08);
   const x = pos.x * canvas.width;
   const y = pos.y * canvas.height;
 
   ctx.textBaseline = "top";
   lines.forEach((line, index) => {
-    // Puste wiersze są zachowywane jako odstęp, ale nie rysujemy pustego tekstu.
     if (line) ctx.fillText(line, x, y + index * lineHeight, maxWidth);
   });
 
