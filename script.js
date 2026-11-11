@@ -36,9 +36,7 @@ function drawMeme() {
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.lineJoin = "round";
-  ctx.fillStyle = "#fff";
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = Math.max(2, baseSize * 0.09);
+  ctx.fillStyle = "#000";
 
   textBoxes = {};
   textBoxes.top = drawText(topInput.value, positions.top, "top");
@@ -46,7 +44,7 @@ function drawMeme() {
 }
 
 function wrapText(text, maxWidth) {
-  const words = text.toUpperCase().split(/\s+/);
+  const words = text.split(/\s+/);
   const lines = [];
   let line = "";
   for (const word of words) {
@@ -75,11 +73,9 @@ function drawText(text, position, anchor) {
     const yy = firstY + index * lineHeight;
     if (anchor === "bottom") {
       ctx.textBaseline = "bottom";
-      ctx.strokeText(part, x, yy, maxWidth);
       ctx.fillText(part, x, yy, maxWidth);
     } else {
       ctx.textBaseline = "top";
-      ctx.strokeText(part, x, yy, maxWidth);
       ctx.fillText(part, x, yy, maxWidth);
     }
   });
