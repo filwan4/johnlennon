@@ -34,7 +34,7 @@ output { color:var(--accent); float:right; }
 .preview-heading { display:flex; justify-content:space-between; margin-bottom:16px; font-size:9px; }
 .preview-heading span:last-child { color:var(--accent); }
 .preview { min-height:360px; display:grid; place-items:center; overflow:hidden; border-radius:10px; background:repeating-conic-gradient(#202027 0% 25%,#19191f 0% 50%) 50% / 20px 20px; }
-canvas { display:block; max-width:100%; max-height:72vh; width:auto; height:auto; object-fit:contain; }
+canvas { display:block; max-width:100%; max-height:72vh; width:auto; height:auto; object-fit:contain; touch-action:none; cursor:grab; }\ncanvas.dragging { cursor:grabbing; }\n.drag-hint { color:var(--muted); font-size:11px; text-align:center; margin:12px 0 0; }
 .placeholder { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--muted); text-align:center; padding:40px 15px; }
 .placeholder span { font-size:40px; color:#626270; }
 .placeholder strong { color:#ddd; font-size:13px; }
