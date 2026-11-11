@@ -1,15 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moja Strona</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101014">
+  <title>Meme Maker</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Witaj na mojej stronie przybyszu(xdd)!</h1>
-    <p>To jest przykładowy tekst mowie fr.</p>
-    <img src="PurpleGuySpriteWiększy.webp" alt="Obrazek">
-    <script src="script.js"></script>
+  <main class="app">
+    <header>
+      <div class="eyebrow">PROSTY GENERATOR MEMÓW</div>
+      <h1>Meme<span>Maker.</span></h1>
+      <p>Wrzuć zdjęcie, wpisz tekst i gotowe.</p>
+    </header>
+
+    <section class="workspace">
+      <div class="controls">
+        <label class="upload" for="imageInput">
+          <span class="upload-icon">＋</span>
+          <span><strong>Wybierz zdjęcie</strong><small>JPG, PNG lub WEBP</small></span>
+        </label>
+        <input id="imageInput" type="file" accept="image/*">
+
+        <label for="topText">Tekst u góry</label>
+        <input id="topText" type="text" placeholder="WPISZ TEKST..." maxlength="120">
+        <label for="bottomText">Tekst na dole</label>
+        <input id="bottomText" type="text" placeholder="...I DRUGĄ CZĘŚĆ" maxlength="120">
+
+        <label for="fontSize">Rozmiar tekstu <output id="fontSizeValue">8%</output></label>
+        <input id="fontSize" type="range" min="3" max="15" value="8">
+
+        <button id="downloadButton" class="download" disabled>Pobierz mema <span>↓</span></button>
+        <p class="hint">Obraz nie jest wysyłany na serwer. Wszystko działa lokalnie w przeglądarce.</p>
+      </div>
+
+      <div class="preview-wrap">
+        <div class="preview-heading"><span>PODGLĄD</span><span id="imageStatus">BRAK ZDJĘCIA</span></div>
+        <div class="preview" id="preview">
+          <div class="placeholder"><span>▧</span><strong>Twoje zdjęcie pojawi się tutaj</strong><small>Wybierz plik, aby zacząć</small></div>
+          <canvas id="memeCanvas" hidden></canvas>
+        </div>
+      </div>
+    </section>
+    <footer>MEMEMAKER · BURST MY BUBBLE</footer>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>
