@@ -1,4 +1,3 @@
-// 📍 Pobieranie elementów DOM
 const topInput = document.getElementById("topText");
 const textSizeInput = document.getElementById("textSize");
 const textSizeValue = document.getElementById("textSizeValue");
@@ -8,26 +7,20 @@ const downloadButton = document.getElementById("downloadButton");
 const preview = document.getElementById("preview");
 const imageStatus = document.getElementById("imageStatus");
 
-// 🖼️ Stałe zdjęcie tła i pozycja cytatu
 let sourceImage = null;
 let fontReady = false;
 let dragging = false;
+let rendered = false;
 const position = { x: 0.5, y: 0.035 };
 let textBox = null;
 const defaultImagePath = "Untitled109_20261111234813.png";
 
-// 🔤 Ładowanie czcionki z ponownym przerysowaniem
-document.fonts.load('48px "Burst My Bubble"').then(() => {
-  fontReady = true;
-  if (sourceImage) drawMeme();
-});
-
 function getQuoteText() {
   const value = topInput.value.trim();
+  // Use straight ASCII quotation marks, regardless of the user's input.
   return value ? `"${value}"` : "";
 }
 
-// 🎨 Rysowanie zdjęcia i cytatu
 function drawMeme() {
   if (!sourceImage || !fontReady) return;
 
@@ -35,31 +28,29 @@ function drawMeme() {
   const scale = Math.min(1, maxSide / Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight));
   canvas.width = Math.round(sourceImage.naturalWidth * scale);
   canvas.height = Math.round(sourceImage.naturalHeight * scale);
-
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
   const fontSize = canvas.width * (Number(textSizeInput.value) / 100);
   ctx.font = `${fontSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
-
   textBox = drawText(getQuoteText(), position, fontSize);
+  rendered = true;
+  downloadButton.disabled = false;
 }
 
-// 📐 Zawijanie tekstu z zachowaniem ręcznych nowych linii
 function wrapText(text, maxWidth) {
   const paragraphs = String(text).split(/\r\n|\r|\n/);
   const lines = [];
 
   for (const paragraph of paragraphs) {
-    if (paragraph.length === 0) {
+    if (!paragraph.length) {
       lines.push("");
       continue;
     }
 
     const words = paragraph.trim().split(/\s+/);
     let line = "";
-
     for (const word of words) {
       const testLine = line ? `${line} ${word}` : word;
       if (line && ctx.measureText(testLine).width > maxWidth) {
@@ -74,7 +65,6 @@ function wrapText(text, maxWidth) {
   return lines;
 }
 
-// ✍️ Rysowanie wszystkich wierszy tekstu na zdjęciu
 function drawText(text, pos, fontSize) {
   if (!text.trim()) return null;
 
@@ -99,7 +89,6 @@ function drawText(text, pos, fontSize) {
   };
 }
 
-// 🖱️ Współrzędne wskaźnika na canvasie
 function pointerPosition(event) {
   const rect = canvas.getBoundingClientRect();
   return {
@@ -108,7 +97,6 @@ function pointerPosition(event) {
   };
 }
 
-// 🖐️ Przesuwanie bloku tekstu
 canvas.addEventListener("pointerdown", event => {
   if (!sourceImage || !textBox) return;
   const point = pointerPosition(event);
@@ -137,36 +125,69 @@ function stopDragging() {
   canvas.addEventListener(type, stopDragging);
 });
 
-// 📥 Wczytanie jednego, stałego zdjęcia
+function renderIfReady() {
+  if (sourceImage && fontReady) drawMeme();
+}
+
+topInput.addEventListener("input", renderIfReady);
+textSizeInput.addEventListener("input", () => {
+  textSizeValue.value = `${textSizeInput.value}%`;
+  textSizeValue.textContent = `${textSizeInput.value}%`;
+  renderIfReady();
+});
+
+// Load the local fixed background image.
 const defaultImage = new Image();
 defaultImage.onload = () => {
   sourceImage = defaultImage;
   preview.querySelector(".placeholder")?.remove();
   canvas.hidden = false;
-  downloadButton.disabled = false;
   imageStatus.textContent = "TŁO ZAŁADOWANE";
-  drawMeme();
+  downloadButton.disabled = true;
+  renderIfReady();
 };
 defaultImage.onerror = () => {
   imageStatus.textContent = "NIE UDAŁO SIĘ WCZYTAĆ TŁA";
+  downloadButton.disabled = true;
 };
 defaultImage.src = defaultImagePath;
 
-// Odświeżanie tekstu na podglądzie
-topInput.addEventListener("input", drawMeme);
+// Wait for the custom font. If it fails, keep the app usable with the CSS fallback.
+document.fonts.load('48px "Burst My Bubble"')
+  .catch(() => [])
+  .finally(() => {
+    fontReady = true;
+    renderIfReady();
+  });
 
-// Suwak rozmiaru tekstu
-textSizeInput.addEventListener("input", () => {
-  textSizeValue.value = `${textSizeInput.value}%`;
-  textSizeValue.textContent = `${textSizeInput.value}%`;
-  drawMeme();
-});
-
-// 💾 Pobieranie gotowego cytatu
+// Download the rendered canvas as a PNG file.
 downloadButton.addEventListener("click", () => {
-  if (!sourceImage) return;
-  const link = document.createElement("a");
-  link.download = "john-lennon-quote.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  if (!sourceImage || !rendered) return;
+
+  const saveBlob = blob => {
+    if (!blob) {
+      downloadFromDataUrl();
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "john-lennon-quote.png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const downloadFromDataUrl = () => {
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "john-lennon-quote.png";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  if (canvas.toBlob) canvas.toBlob(saveBlob, "image/png");
+  else downloadFromDataUrl();
 });
