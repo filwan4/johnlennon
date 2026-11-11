@@ -10,7 +10,7 @@ const imageStatus = document.getElementById("imageStatus");
 // 🖼️ Stan aplikacji
 let sourceImage = null;
 let fontReady = false;
-let dragging = false; // teraz przesuwamy tylko jeden element
+let dragging = false;
 const position = { x: 0.5, y: 0.035 };
 let textBox = null;
 
@@ -26,28 +26,26 @@ function drawMeme() {
 
   const maxSide = 1800;
   const scale = Math.min(1, maxSide / Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight));
-
   canvas.width = Math.round(sourceImage.naturalWidth * scale);
   canvas.height = Math.round(sourceImage.naturalHeight * scale);
 
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  // Rozmiar tekstu dopasowany do szerokości canvasa.
   const baseSize = Math.max(18, canvas.width * 0.09);
   ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
 
-  textBox = drawText(topInput.value, position, "top");
+  textBox = drawText(topInput.value, position);
 }
 
-// 📐 Zawijanie tekstu do szerokości obrazu z zachowaniem ręcznych nowych linii
+// 📐 Zawijanie tekstu. Enter tworzy nowy akapit/wiersz, a długie wiersze zawijają się automatycznie.
 function wrapText(text, maxWidth) {
-  const paragraphs = text.replace(/\r\n?/g, "\n").split("\n");
+  const paragraphs = String(text).split(/\r\n|\r|\n/);
   const lines = [];
 
   for (const paragraph of paragraphs) {
-    if (!paragraph.trim()) {
+    if (paragraph.length === 0) {
       lines.push("");
       continue;
     }
@@ -56,12 +54,12 @@ function wrapText(text, maxWidth) {
     let line = "";
 
     for (const word of words) {
-      const test = line ? `${line} ${word}` : word;
-      if (ctx.measureText(test).width > maxWidth && line) {
+      const testLine = line ? `${line} ${word}` : word;
+      if (line && ctx.measureText(testLine).width > maxWidth) {
         lines.push(line);
         line = word;
       } else {
-        line = test;
+        line = testLine;
       }
     }
 
@@ -71,39 +69,37 @@ function wrapText(text, maxWidth) {
   return lines;
 }
 
-// ✍️ Rysowanie pojedynczego bloku tekstu
-function drawText(text, pos, anchor) {
+// ✍️ Rysowanie wszystkich wierszy tekstu na zdjęciu
+function drawText(text, pos) {
   if (!text.trim()) return null;
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = 0.09 * canvas.width * 1.08;
+  const lineHeight = Math.max(22, canvas.width * 0.09 * 1.08);
   const x = pos.x * canvas.width;
   const y = pos.y * canvas.height;
 
   ctx.textBaseline = "top";
-  const totalHeight = lines.length * lineHeight;
-  const startY = anchor === "bottom" ? y - totalHeight : y;
-
-  lines.forEach((part, index) => {
-    const lineY = startY + index * lineHeight;
-    ctx.fillText(part, x, lineY, maxWidth);
+  lines.forEach((line, index) => {
+    // Puste wiersze są zachowywane jako odstęp, ale nie rysujemy pustego tekstu.
+    if (line) ctx.fillText(line, x, y + index * lineHeight, maxWidth);
   });
 
   const measuredWidth = Math.min(
     maxWidth,
     Math.max(...lines.map(line => ctx.measureText(line).width))
   );
+  const totalHeight = lines.length * lineHeight;
 
   return {
     left: x - measuredWidth / 2 - 12,
     right: x + measuredWidth / 2 + 12,
-    top: startY - 8,
-    bottom: startY + totalHeight + 8
+    top: y - 8,
+    bottom: y + totalHeight + 8
   };
 }
 
-// 🖱️ Pobieranie pozycji kursora lub palca na Canvasie
+// 🖱️ Pobieranie pozycji kursora lub palca na canvasie
 function pointerPosition(event) {
   const rect = canvas.getBoundingClientRect();
   return {
@@ -112,12 +108,11 @@ function pointerPosition(event) {
   };
 }
 
-// 🖐️ Obsługa przeciągania tekstu (myszka i dotyk palcem)
+// 🖐️ Obsługa przesuwania bloku tekstu
 canvas.addEventListener("pointerdown", event => {
   if (!sourceImage || !textBox) return;
   const point = pointerPosition(event);
 
-  // Sprawdzamy czy kliknięto w obszar tekstu
   if (point.x >= textBox.left && point.x <= textBox.right &&
       point.y >= textBox.top && point.y <= textBox.bottom) {
     dragging = true;
@@ -165,24 +160,7 @@ imageInput.addEventListener("change", event => {
   img.src = url;
 });
 
-// Enter wstawia nową linię i odświeża podgląd.
-topInput.addEventListener("keydown", event => {
-  if (event.key !== "Enter") return;
-
-  event.preventDefault();
-  const start = topInput.selectionStart;
-  const end = topInput.selectionEnd;
-  const nextValue = `${topInput.value.slice(0, start)}\n${topInput.value.slice(end)}`;
-  const maxChars = Number(topInput.getAttribute("maxlength") || 120);
-
-  if (nextValue.length > maxChars) return;
-
-  topInput.value = nextValue;
-  topInput.selectionStart = topInput.selectionEnd = start + 1;
-  drawMeme();
-});
-
-// 🎛️ Nasłuchiwanie zmian w polu tekstowym
+// Zwykłe zdarzenie input obsługuje pisanie i Enter w textarea.
 topInput.addEventListener("input", drawMeme);
 
 // 💾 Pobieranie gotowego mema
