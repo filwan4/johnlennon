@@ -10,6 +10,7 @@ const preview = document.getElementById("preview");
 const imageStatus = document.getElementById("imageStatus");
 
 let sourceImage = null;
+let fontReady = false;
 let dragging = null;
 let textBoxes = {};
 const positions = {
@@ -17,8 +18,13 @@ const positions = {
   bottom: { x: 0.5, y: 0.965 }
 };
 
+document.fonts.load('48px "Burst My Bubble"').then(() => {
+  fontReady = true;
+  drawMeme();
+});
+
 function drawMeme() {
-  if (!sourceImage) return;
+  if (!sourceImage || !fontReady) return;
   const maxSide = 1800;
   const scale = Math.min(1, maxSide / Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight));
   canvas.width = Math.round(sourceImage.naturalWidth * scale);
