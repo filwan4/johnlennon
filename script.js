@@ -22,6 +22,11 @@ document.fonts.load('48px "Burst My Bubble"').then(() => {
   if (sourceImage) drawMeme();
 });
 
+function getQuoteText() {
+  const value = topInput.value.trim();
+  return value ? `"${value}"` : "";
+}
+
 // 🎨 Rysowanie zdjęcia i cytatu
 function drawMeme() {
   if (!sourceImage || !fontReady) return;
@@ -38,7 +43,7 @@ function drawMeme() {
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
 
-  textBox = drawText(topInput.value, position, fontSize);
+  textBox = drawText(getQuoteText(), position, fontSize);
 }
 
 // 📐 Zawijanie tekstu z zachowaniem ręcznych nowych linii
