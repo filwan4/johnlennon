@@ -128,18 +128,22 @@ input[type="file"] {
   margin-top: 3px;
 }
 
-input[type="text"] {
+textarea {
   width: 100%;
+  min-height: 104px;
+  resize: vertical;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: #111116;
   padding: 12px;
   color: white;
   outline: none;
+  font: inherit;
   font-size: 13px;
+  line-height: 1.5;
 }
 
-input[type="text"]:focus {
+textarea:focus {
   border-color: var(--accent);
 }
 

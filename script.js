@@ -26,13 +26,13 @@ function drawMeme() {
 
   const maxSide = 1800;
   const scale = Math.min(1, maxSide / Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight));
-  
+
   canvas.width = Math.round(sourceImage.naturalWidth * scale);
   canvas.height = Math.round(sourceImage.naturalHeight * scale);
-  
+
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  // 🔒 Rozmiar zablokowany na sztywno na 9% szerokości canvasu
+  // Rozmiar tekstu dopasowany do szerokości canvasa.
   const baseSize = Math.max(18, canvas.width * 0.09);
   ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
@@ -41,22 +41,33 @@ function drawMeme() {
   textBox = drawText(topInput.value, position, "top");
 }
 
-// 📐 Zawijanie tekstu do nowej linii
+// 📐 Zawijanie tekstu do szerokości obrazu z zachowaniem ręcznych nowych linii
 function wrapText(text, maxWidth) {
-  const words = text.split(/\s+/);
+  const paragraphs = text.replace(/\r\n?/g, "\n").split("\n");
   const lines = [];
-  let line = "";
 
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = test;
+  for (const paragraph of paragraphs) {
+    if (!paragraph.trim()) {
+      lines.push("");
+      continue;
     }
+
+    const words = paragraph.trim().split(/\s+/);
+    let line = "";
+
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+
+    lines.push(line);
   }
-  if (line) lines.push(line);
+
   return lines;
 }
 
@@ -66,7 +77,7 @@ function drawText(text, pos, anchor) {
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = 0.09 * canvas.width * 1.08; // linia dopasowana do 9%
+  const lineHeight = 0.09 * canvas.width * 1.08;
   const x = pos.x * canvas.width;
   const y = pos.y * canvas.height;
 
@@ -80,7 +91,7 @@ function drawText(text, pos, anchor) {
   });
 
   const measuredWidth = Math.min(
-    maxWidth, 
+    maxWidth,
     Math.max(...lines.map(line => ctx.measureText(line).width))
   );
 
@@ -140,7 +151,7 @@ imageInput.addEventListener("change", event => {
 
   const url = URL.createObjectURL(file);
   const img = new Image();
-  
+
   img.onload = () => {
     sourceImage = img;
     preview.querySelector(".placeholder")?.remove();
@@ -150,7 +161,7 @@ imageInput.addEventListener("change", event => {
     drawMeme();
     URL.revokeObjectURL(url);
   };
-  
+
   img.src = url;
 });
 
