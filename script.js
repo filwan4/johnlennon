@@ -165,6 +165,20 @@ imageInput.addEventListener("change", event => {
   img.src = url;
 });
 
+// Enter wstawia jawnie nową linię, a tekst mema odświeża się od razu.
+topInput.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+
+  event.preventDefault();
+  const start = topInput.selectionStart;
+  const end = topInput.selectionEnd;
+  const remaining = topInput.maxLength - (topInput.value.length - (end - start));
+  if (remaining < 1) return;
+
+  topInput.setRangeText("\n", start, end, "end");
+  topInput.dispatchEvent(new Event("input", { bubbles: true }));
+});
+
 // 🎛️ Nasłuchiwanie zmian w polu tekstowym
 topInput.addEventListener("input", drawMeme);
 
