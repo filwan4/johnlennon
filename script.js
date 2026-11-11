@@ -8,7 +8,7 @@ const downloadButton = document.getElementById("downloadButton");
 const preview = document.getElementById("preview");
 const imageStatus = document.getElementById("imageStatus");
 
-// 🖼️ Stan aplikacji
+// 🖼️ Stałe zdjęcie tła i pozycja cytatu
 let sourceImage = null;
 let fontReady = false;
 let dragging = false;
@@ -22,7 +22,7 @@ document.fonts.load('48px "Burst My Bubble"').then(() => {
   if (sourceImage) drawMeme();
 });
 
-// 🎨 Główna funkcja rysująca mem
+// 🎨 Rysowanie zdjęcia i cytatu
 function drawMeme() {
   if (!sourceImage || !fontReady) return;
 
@@ -41,7 +41,7 @@ function drawMeme() {
   textBox = drawText(topInput.value, position, fontSize);
 }
 
-// 📐 Zawijanie tekstu, zachowujące ręczne nowe linie
+// 📐 Zawijanie tekstu z zachowaniem ręcznych nowych linii
 function wrapText(text, maxWidth) {
   const paragraphs = String(text).split(/\r\n|\r|\n/);
   const lines = [];
@@ -64,10 +64,8 @@ function wrapText(text, maxWidth) {
         line = testLine;
       }
     }
-
     lines.push(line);
   }
-
   return lines;
 }
 
@@ -86,12 +84,8 @@ function drawText(text, pos, fontSize) {
     if (line) ctx.fillText(line, x, y + index * lineHeight, maxWidth);
   });
 
-  const measuredWidth = Math.min(
-    maxWidth,
-    Math.max(...lines.map(line => ctx.measureText(line).width))
-  );
+  const measuredWidth = Math.min(maxWidth, Math.max(...lines.map(line => ctx.measureText(line).width)));
   const totalHeight = lines.length * lineHeight;
-
   return {
     left: x - measuredWidth / 2 - 12,
     right: x + measuredWidth / 2 + 12,
@@ -100,7 +94,7 @@ function drawText(text, pos, fontSize) {
   };
 }
 
-// 🖱️ Pobieranie pozycji kursora lub palca na canvasie
+// 🖱️ Współrzędne wskaźnika na canvasie
 function pointerPosition(event) {
   const rect = canvas.getBoundingClientRect();
   return {
@@ -109,11 +103,10 @@ function pointerPosition(event) {
   };
 }
 
-// 🖐️ Obsługa przesuwania bloku tekstu
+// 🖐️ Przesuwanie bloku tekstu
 canvas.addEventListener("pointerdown", event => {
   if (!sourceImage || !textBox) return;
   const point = pointerPosition(event);
-
   if (point.x >= textBox.left && point.x <= textBox.right &&
       point.y >= textBox.top && point.y <= textBox.bottom) {
     dragging = true;
@@ -135,12 +128,11 @@ function stopDragging() {
   dragging = false;
   canvas.classList.remove("dragging");
 }
-
 ["pointerup", "pointercancel", "lostpointercapture"].forEach(type => {
   canvas.addEventListener(type, stopDragging);
 });
 
-// 📥 Wczytanie stałego zdjęcia tła
+// 📥 Wczytanie jednego, stałego zdjęcia
 const defaultImage = new Image();
 defaultImage.onload = () => {
   sourceImage = defaultImage;
@@ -150,23 +142,26 @@ defaultImage.onload = () => {
   imageStatus.textContent = "TŁO ZAŁADOWANE";
   drawMeme();
 };
+defaultImage.onerror = () => {
+  imageStatus.textContent = "NIE UDAŁO SIĘ WCZYTAĆ TŁA";
+};
 defaultImage.src = defaultImagePath;
 
-// Tekst odświeża się podczas pisania, a Entery są renderowane jako osobne wiersze.
+// Odświeżanie tekstu na podglądzie
 topInput.addEventListener("input", drawMeme);
 
-// Zmiana suwaka aktualizuje wartość i od razu przerysowuje mem.
+// Suwak rozmiaru tekstu
 textSizeInput.addEventListener("input", () => {
   textSizeValue.value = `${textSizeInput.value}%`;
   textSizeValue.textContent = `${textSizeInput.value}%`;
   drawMeme();
 });
 
-// 💾 Pobieranie gotowego mema
+// 💾 Pobieranie gotowego cytatu
 downloadButton.addEventListener("click", () => {
   if (!sourceImage) return;
   const link = document.createElement("a");
-  link.download = "meme.png";
+  link.download = "john-lennon-quote.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
