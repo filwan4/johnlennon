@@ -1,6 +1,8 @@
 // 📍 Pobieranie elementów DOM
 const imageInput = document.getElementById("imageInput");
 const topInput = document.getElementById("topText");
+const textSizeInput = document.getElementById("textSize");
+const textSizeValue = document.getElementById("textSizeValue");
 const canvas = document.getElementById("memeCanvas");
 const ctx = canvas.getContext("2d");
 const downloadButton = document.getElementById("downloadButton");
@@ -10,7 +12,7 @@ const imageStatus = document.getElementById("imageStatus");
 // 🖼️ Stan aplikacji
 let sourceImage = null;
 let fontReady = false;
-let dragging = false; // teraz przesuwamy tylko jeden element
+let dragging = false;
 const position = { x: 0.5, y: 0.035 };
 let textBox = null;
 
@@ -31,16 +33,16 @@ function drawMeme() {
 
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  // Rozmiar tekstu to 4% szerokości canvasa.
-  const baseSize = canvas.width * 0.04;
-  ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
+  // Rozmiar jest procentem szerokości canvasa; suwak nie ma wymuszonego minimum 18 px.
+  const fontSize = canvas.width * (Number(textSizeInput.value) / 100);
+  ctx.font = `${fontSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
 
-  textBox = drawText(topInput.value, position);
+  textBox = drawText(topInput.value, position, fontSize);
 }
 
-// 📐 Zawijanie tekstu. Enter tworzy nowy akapit/wiersz, a długie wiersze zawijają się automatycznie.
+// 📐 Zawijanie tekstu, zachowujące ręczne nowe linie
 function wrapText(text, maxWidth) {
   const paragraphs = String(text).split(/\r\n|\r|\n/);
   const lines = [];
@@ -71,18 +73,17 @@ function wrapText(text, maxWidth) {
 }
 
 // ✍️ Rysowanie wszystkich wierszy tekstu na zdjęciu
-function drawText(text, pos) {
+function drawText(text, pos, fontSize) {
   if (!text.trim()) return null;
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = canvas.width * 0.04 * 1.08;
+  const lineHeight = fontSize * 1.08;
   const x = pos.x * canvas.width;
   const y = pos.y * canvas.height;
 
   ctx.textBaseline = "top";
   lines.forEach((line, index) => {
-    // Puste wiersze są zachowywane jako odstęp, ale nie rysujemy pustego tekstu.
     if (line) ctx.fillText(line, x, y + index * lineHeight, maxWidth);
   });
 
@@ -161,8 +162,15 @@ imageInput.addEventListener("change", event => {
   img.src = url;
 });
 
-// Zwykłe zdarzenie input obsługuje pisanie i Enter w textarea.
+// Tekst odświeża się podczas pisania, a Entery są renderowane jako osobne wiersze.
 topInput.addEventListener("input", drawMeme);
+
+// Zmiana suwaka aktualizuje wartość i od razu przerysowuje mem.
+textSizeInput.addEventListener("input", () => {
+  textSizeValue.value = `${textSizeInput.value}%`;
+  textSizeValue.textContent = `${textSizeInput.value}%`;
+  drawMeme();
+});
 
 // 💾 Pobieranie gotowego mema
 downloadButton.addEventListener("click", () => {
