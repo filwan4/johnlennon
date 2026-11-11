@@ -1,5 +1,4 @@
 // 📍 Pobieranie elementów DOM
-const imageInput = document.getElementById("imageInput");
 const topInput = document.getElementById("topText");
 const textSizeInput = document.getElementById("textSize");
 const textSizeValue = document.getElementById("textSizeValue");
@@ -15,6 +14,7 @@ let fontReady = false;
 let dragging = false;
 const position = { x: 0.5, y: 0.035 };
 let textBox = null;
+const defaultImagePath = "Untitled109_20261111234813.png";
 
 // 🔤 Ładowanie czcionki z ponownym przerysowaniem
 document.fonts.load('48px "Burst My Bubble"').then(() => {
@@ -33,7 +33,6 @@ function drawMeme() {
 
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  // Rozmiar jest procentem szerokości canvasa; suwak nie ma wymuszonego minimum 18 px.
   const fontSize = canvas.width * (Number(textSizeInput.value) / 100);
   ctx.font = `${fontSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
@@ -141,26 +140,17 @@ function stopDragging() {
   canvas.addEventListener(type, stopDragging);
 });
 
-// 📥 Wgrywanie pliku obrazu
-imageInput.addEventListener("change", event => {
-  const file = event.target.files[0];
-  if (!file || !file.type.startsWith("image/")) return;
-
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-
-  img.onload = () => {
-    sourceImage = img;
-    preview.querySelector(".placeholder")?.remove();
-    canvas.hidden = false;
-    downloadButton.disabled = false;
-    imageStatus.textContent = "ZDJĘCIE ZAŁADOWANE";
-    drawMeme();
-    URL.revokeObjectURL(url);
-  };
-
-  img.src = url;
-});
+// 📥 Wczytanie stałego zdjęcia tła
+const defaultImage = new Image();
+defaultImage.onload = () => {
+  sourceImage = defaultImage;
+  preview.querySelector(".placeholder")?.remove();
+  canvas.hidden = false;
+  downloadButton.disabled = false;
+  imageStatus.textContent = "TŁO ZAŁADOWANE";
+  drawMeme();
+};
+defaultImage.src = defaultImagePath;
 
 // Tekst odświeża się podczas pisania, a Entery są renderowane jako osobne wiersze.
 topInput.addEventListener("input", drawMeme);

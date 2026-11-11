@@ -5,24 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101014">
   <title>Meme Maker</title>
-  <link rel="stylesheet" href="style.css?v=text-size-slider-1">
+  <link rel="stylesheet" href="style.css?v=single-bg-1">
 </head>
 <body>
   <main class="app">
     <header>
       <div class="eyebrow">PROSTY GENERATOR MEMÓW</div>
       <h1>Meme<span>Maker.</span></h1>
-      <p>Wrzuć zdjęcie, wpisz tekst i gotowe.</p>
+      <p>Dodaj tekst do stałego zdjęcia i pobierz gotowy mem.</p>
     </header>
 
     <section class="workspace">
       <div class="controls">
-        <label class="upload" for="imageInput">
-          <span class="upload-icon">＋</span>
-          <span><strong>Wybierz zdjęcie</strong><small>JPG, PNG lub WEBP</small></span>
-        </label>
-        <input id="imageInput" type="file" accept="image/*">
-
         <label for="topText">Tekst mema</label>
         <textarea id="topText" placeholder="WPISZ TEKST..." maxlength="120" rows="4"></textarea>
 
@@ -32,19 +26,19 @@
         <input id="textSize" type="range" min="1" max="10" step="0.5" value="4" aria-label="Rozmiar tekstu na zdjęciu">
 
         <button id="downloadButton" class="download" disabled>Pobierz mema <span>↓</span></button>
-        <p class="hint">Obraz nie jest wysyłany na serwer. Wszystko działa lokalnie w przeglądarce.</p>
+        <p class="hint">To zdjęcie jest ustawione jako tło. Możesz wpisać tekst i pobrać wynik bez wgrywania plików.</p>
       </div>
 
       <div class="preview-wrap">
-        <div class="preview-heading"><span>PODGLĄD</span><span id="imageStatus">BRAK ZDJĘCIA</span></div>
+        <div class="preview-heading"><span>PODGLĄD</span><span id="imageStatus">ŁADOWANIE TŁA...</span></div>
         <div class="preview" id="preview">
-          <div class="placeholder"><span>▧</span><strong>Twoje zdjęcie pojawi się tutaj</strong><small>Wybierz plik, aby zacząć</small></div>
+          <div class="placeholder"><span>▧</span><strong>Ładowanie zdjęcia tła...</strong><small>Proszę czekać</small></div>
           <canvas id="memeCanvas" hidden></canvas>
         </div>
       </div>
     </section>
     <footer>MEMEMAKER · BURST MY BUBBLE</footer>
   </main>
-  <script src="script.js?v=text-size-slider-1"></script>
+  <script src="script.js?v=single-bg-1"></script>
 </body>
 </html>
