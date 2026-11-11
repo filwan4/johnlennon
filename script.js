@@ -31,8 +31,8 @@ function drawMeme() {
 
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
-  // Rozmiar tekstu to 5% szerokości canvasa.
-  const baseSize = Math.max(18, canvas.width * 0.05);
+  // Rozmiar tekstu to 4% szerokości canvasa.
+  const baseSize = canvas.width * 0.04;
   ctx.font = `${baseSize}px "Burst My Bubble", Impact, sans-serif`;
   ctx.textAlign = "center";
   ctx.fillStyle = "#000000";
@@ -76,7 +76,7 @@ function drawText(text, pos) {
 
   const maxWidth = canvas.width * 0.94;
   const lines = wrapText(text, maxWidth);
-  const lineHeight = Math.max(18, canvas.width * 0.05 * 1.08);
+  const lineHeight = canvas.width * 0.04 * 1.08;
   const x = pos.x * canvas.width;
   const y = pos.y * canvas.height;
 
